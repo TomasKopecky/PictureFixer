@@ -18,8 +18,7 @@ namespace PictureFixer.Services
         {
             foreach (string file in files)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (File.Exists(file))
                 {
