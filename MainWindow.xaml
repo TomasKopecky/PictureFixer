@@ -1,0 +1,169 @@
+﻿<ui:FluentWindow
+    x:Class="PictureFixer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:PictureFixer"
+    xmlns:converters="clr-namespace:PictureFixer.Converters"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Konvertor obrázků"
+    Width="800"
+    MinWidth="800"
+    MinHeight="520"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="PathTextBoxStyle" TargetType="ui:TextBox">
+            <Setter Property="Margin" Value="8" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" Inverse="True"/>
+    </Window.Resources>
+
+    <Grid Margin="20,0,20,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <ui:TitleBar
+            Title="Konvertor obrázků do jednotné podoby"
+            Grid.Row="0"
+            Icon="{ui:SymbolIcon Image24}" />
+
+        <!--  Main Content  -->
+        <StackPanel Grid.Row="1" Margin="0,20,0,0">
+            <!--  InfoBar for status/error messages  -->
+            <ui:InfoBar
+                Margin="0,0,0,16"
+                IsOpen="{Binding IsStatusMessage}"
+                Message="{Binding StatusMessage}"
+                Severity="{Binding StatusSeverity}" />
+
+            <!--  Source Folder  -->
+            <ui:Card Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBox
+                        Grid.Column="0"
+                        IsEnabled="{Binding IsNotLoading}"
+                        IsReadOnly="False"
+                        PlaceholderText="Zvolte zdrojový adresář"
+                        Style="{StaticResource PathTextBoxStyle}"
+                        Text="{Binding SourceFolderName}" />
+                    <ui:Button
+                        Grid.Column="1"
+                        Margin="8"
+                        Command="{Binding BrowseSourceCommand}"
+                        Content="Procházet"
+                        Icon="{ui:SymbolIcon Folder24}"
+                        IsEnabled="{Binding IsNotLoading}" />
+                </Grid>
+            </ui:Card>
+
+            <!--  Destination Folder  -->
+            <ui:Card Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBox
+                        Grid.Column="0"
+                        IsEnabled="{Binding IsNotLoading}"
+                        IsReadOnly="False"
+                        PlaceholderText="Zvolte cílový adresář"
+                        Style="{StaticResource PathTextBoxStyle}"
+                        Text="{Binding DestinationFolderName}" />
+                    <ui:Button
+                        Grid.Column="1"
+                        Margin="8"
+                        Command="{Binding BrowseDestinationCommand}"
+                        Content="Procházet"
+                        Icon="{ui:SymbolIcon Folder24}"
+                        IsEnabled="{Binding IsNotLoading}" />
+                </Grid>
+            </ui:Card>
+
+            <!--  Progress Bar & Text  -->
+            <ui:Card Margin="0,0,0,16" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel>
+                    <ProgressBar
+                        Height="8"
+                        Margin="8"
+                        Maximum="{Binding MaxProgressValue}"
+                        Minimum="0"
+                        Value="{Binding CurrentProgressValue}" />
+                    <TextBlock
+                        Margin="8,4,8,8"
+                        Text="{Binding ProgressText}"
+                        TextAlignment="Center" />
+                </StackPanel>
+            </ui:Card>
+
+            <!--  Failed File List  -->
+            <ui:Card Margin="0,0,0,16" Visibility="{Binding IsError, Converter={StaticResource BoolToVisibilityConverter}}">
+                <ListBox
+                    Height="100"
+                    Margin="8"
+                    ItemsSource="{Binding FailedFiles}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Foreground" Value="Red" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </ui:Card>
+        </StackPanel>
+
+        <!--  Footer with Start Button and Theme Switch  -->
+        <ui:Card Grid.Row="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!--  Theme Switch Button (left)  -->
+                <ui:Button
+                    Grid.Column="0"
+                    Margin="8"
+                    Padding="10,8"
+                    Command="{Binding ToggleThemeCommand}"
+                    Content="Přepnout vzhled"
+                    Icon="{ui:SymbolIcon BrightnessHigh24}"
+                    IsEnabled="{Binding IsNotLoading}" />
+
+                <!--  Copyright (center)  -->
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Opacity="0.6"
+                    Text="© 2025" />
+
+                <!--  Start Button (right)  -->
+                <ui:Button
+                    Grid.Column="2"
+                    Margin="8"
+                    Padding="14,8"
+                    Appearance="Primary"
+                    Command="{Binding StartConversionCommand}"
+                    Content="Spustit konverzi"
+                    Icon="{ui:SymbolIcon Play24}" />
+            </Grid>
+        </ui:Card>
+    </Grid>
+</ui:FluentWindow>
