@@ -5,9 +5,7 @@ using PictureFixer.Services;
 using PictureFixer.Validators;
 using System.Collections.ObjectModel;
 using System.IO;
-using Wpf.Ui;
 using Wpf.Ui.Controls;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PictureFixer.ViewModels
 {

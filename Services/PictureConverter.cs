@@ -1,5 +1,4 @@
 ﻿using PictureFixer.Modals;
-using PictureFixer.Validators;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
