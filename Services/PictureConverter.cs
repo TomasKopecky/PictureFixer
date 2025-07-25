@@ -1,5 +1,4 @@
 ﻿using PictureFixer.Modals;
-using PictureFixer.Validators;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -18,8 +17,7 @@ namespace PictureFixer.Services
         {
             foreach (string file in files)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (File.Exists(file))
                 {

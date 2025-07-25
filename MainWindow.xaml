@@ -2,9 +2,9 @@
     x:Class="PictureFixer.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:PictureFixer.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PictureFixer"
-    xmlns:converters="clr-namespace:PictureFixer.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="Konvertor obrázků"
@@ -20,8 +20,8 @@
             <Setter Property="Height" Value="36" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
         </Style>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" Inverse="True"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" Inverse="True" />
     </Window.Resources>
 
     <Grid Margin="20,0,20,20">
@@ -154,7 +154,18 @@
                     Opacity="0.6"
                     Text="© 2025" />
 
-                <!--  Start Button (right)  -->
+                <!--  Stop Button (visible only when running)  -->
+                <ui:Button
+                    Grid.Column="2"
+                    Margin="8"
+                    Padding="14,8"
+                    Appearance="Danger"
+                    Command="{Binding StopConversionCommand}"
+                    Content="Zastavit konverzi"
+                    Icon="{ui:SymbolIcon Square24}"
+                    Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                <!--  Start Button (visible only when idle)  -->
                 <ui:Button
                     Grid.Column="2"
                     Margin="8"
@@ -162,7 +173,31 @@
                     Appearance="Primary"
                     Command="{Binding StartConversionCommand}"
                     Content="Spustit konverzi"
+                    Icon="{ui:SymbolIcon Play24}"
+                    Visibility="{Binding IsNotLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+
+                <!--  Stop Button  -->
+                <!--
+                <ui:Button
+                    Grid.Column="2"
+                    Margin="8"
+                    Padding="14,8"
+                    Appearance="Danger"
+                    Command="{Binding StopConversionCommand}"
+                    Content="Zastavit konverzi"
                     Icon="{ui:SymbolIcon Play24}" />
+                -->
+                <!--  Start Button  -->
+                <!--
+                <ui:Button
+                    Grid.Column="2"
+                    Margin="8"
+                    Padding="14,8"
+                    Appearance="Primary"
+                    Command="{Binding StartConversionCommand}"
+                    Content="Spustit konverzi"
+                    Icon="{ui:SymbolIcon Play24}" />-->
             </Grid>
         </ui:Card>
     </Grid>

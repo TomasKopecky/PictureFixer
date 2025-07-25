@@ -5,9 +5,7 @@ using PictureFixer.Services;
 using PictureFixer.Validators;
 using System.Collections.ObjectModel;
 using System.IO;
-using Wpf.Ui;
 using Wpf.Ui.Controls;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PictureFixer.ViewModels
 {
@@ -17,6 +15,8 @@ namespace PictureFixer.ViewModels
         private readonly IPictureValidator _pictureValidator;
         private readonly IPictureConverter _pictureConverter;
         private readonly IMessageBoxService _messageBoxService;
+
+        private CancellationTokenSource _cts = new();
         public ObservableCollection<string> ConvertedFiles { get; } = new();
         public ObservableCollection<string> FailedFiles { get; } = new();
 
@@ -89,9 +89,14 @@ namespace PictureFixer.ViewModels
         }
 
         [RelayCommand]
+        private void StopConversion()
+        {
+            _cts?.Cancel();
+        }
+
+        [RelayCommand]
         private async Task StartConversion()
         {
-            IsLoading = true;
             IsError = false;
 
             ConvertedFiles.Clear();
@@ -117,6 +122,9 @@ namespace PictureFixer.ViewModels
                 return;
             }
 
+            IsLoading = true;
+            _cts = new();
+
             var progress = new Progress<PictureConversionProgress>(info =>
             {
                 if (info.IsSuccess)
@@ -134,19 +142,27 @@ namespace PictureFixer.ViewModels
                 _pictureConverter.Convert(
                     files,
                     DestinationFolderName,
-                    progress)
+                    progress,
+                    _cts.Token)
                 );
 
                 StatusSeverity = InfoBarSeverity.Informational;
-                StatusMessage = $"Úspěšně zpracováno: {ConvertedFiles.Count}, chyby: {FailedFiles.Count()}";
+                StatusMessage = $"Úspěšně zpracováno: {ConvertedFiles.Count}/{MaxProgressValue}, chyby: {FailedFiles.Count()}";
             }
-            catch
+            catch (OperationCanceledException)
+            {
+                // Cancellation detected here!
+                StatusSeverity = InfoBarSeverity.Warning;
+                StatusMessage = $"Operace byla zrušena uživatelem - úspěšně zpracováno: {ConvertedFiles.Count}/{MaxProgressValue}, chyby: {FailedFiles.Count()}";
+            }
+            catch (Exception)
             {
                 IsError = true;
                 _messageBoxService.ShowError("Došlo k chybě při převodu obrázků");
             }
             finally
             {
+                _cts.Dispose();
                 IsStatusMessage = true;
                 IsLoading = false;
             }
@@ -175,6 +191,12 @@ namespace PictureFixer.ViewModels
             else if (!Directory.GetFiles(sourceFolder).Any())
             {
                 _messageBoxService.ShowError("Zdrojový adresář neobsahuje žádné soubory");
+                return false;
+            }
+
+            else if (sourceFolder == destinationFolder)
+            {
+                _messageBoxService.ShowError("Zdrojový i cílový adresář jsou totožné - zakázaný stav");
                 return false;
             }
 
