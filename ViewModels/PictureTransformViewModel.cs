@@ -21,10 +21,10 @@ namespace PictureFixer.ViewModels
         public ObservableCollection<string> FailedFiles { get; } = new();
 
         [ObservableProperty]
-        private string _sourceFolderName = "C:\\Users\\user\\Desktop\\pokus_obrazky\\source"; //string.Empty;
+        private string _sourceFolderName = string.Empty;
 
         [ObservableProperty]
-        private string _destinationFolderName = "C:\\Users\\user\\Desktop\\pokus_obrazky\\destination"; //string.Empty;
+        private string _destinationFolderName = string.Empty;
 
         [ObservableProperty]
         private double _currentProgressValue;
